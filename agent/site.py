@@ -650,18 +650,26 @@ class Site(Base):
             )
             region = auth.get("REGION")
 
+            # Optional endpoint for S3-compatible storage. Without it the
+            # client is created exactly as before (AWS S3).
+            client_kwargs = {}
+            if auth.get("ENDPOINT_URL"):
+                client_kwargs["endpoint_url"] = auth["ENDPOINT_URL"]
+
             if region:
                 s3 = boto3.client(
                     "s3",
                     aws_access_key_id=auth["ACCESS_KEY"],
                     aws_secret_access_key=auth["SECRET_KEY"],
                     region_name=region,
+                    **client_kwargs,
                 )
             else:
                 s3 = boto3.client(
                     "s3",
                     aws_access_key_id=auth["ACCESS_KEY"],
                     aws_secret_access_key=auth["SECRET_KEY"],
+                    **client_kwargs,
                 )
 
             for backup_file in backup_files.values():
